@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WHR OAM + COCO Y0 Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="card">
+    <h1>WHR OAM + COCO Y0 Dashboard</h1>
+    <p>Upload Excel, run COCO, view results, maps, and exports.</p>
+  </header>
+
+  <nav class="card tab-nav">
+    <button type="button" class="tab-btn active" data-screen-btn="upload">Upload</button>
+    <button type="button" class="tab-btn" data-screen-btn="coco">COCO Input</button>
+    <button type="button" class="tab-btn" data-screen-btn="results">Results</button>
+    <button type="button" class="tab-btn" data-screen-btn="maps">Maps</button>
+  </nav>
+
+  <button type="button" id="floatingHelpBtn" class="floating-help-btn" aria-label="Section help">?</button>
+  <div id="floatingHelpText" class="floating-help-text hidden-help"></div>
+
+  <section class="card" data-screen="upload">
+    <h2>Upload</h2>
+    <div class="row">
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+      <button id="processBtn">Process File</button>
+    </div>
+    <div id="uploadStatus" class="status-line"></div>
+  </section>
+
+  <section class="card" data-screen="upload">
+    <h2>Detected Column Mapping</h2>
+    <table id="mappingTable">
+      <thead>
+        <tr><th>Required Field</th><th>Matched Column</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="card" data-screen="upload">
+    <h2>Raw Preview</h2>
+    <div class="table-wrap">
+      <table id="rawTable">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Ladder</th>
+            <th>GDP</th>
+            <th>SOC</th>
+            <th>LIFE</th>
+            <th>FREE</th>
+            <th>GEN</th>
+            <th>CORR</th>
+            <th>Dystopia</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" data-screen="coco">
+    <h2>Rank Matrix Preview (Sent to COCO)</h2>
+    <div class="row">
+      <button id="exportMatrixBtn">Export Matrix Text</button>
+    </div>
+    <div class="table-wrap">
+      <table id="matrixTable">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>LAD</th>
+            <th>GDP</th>
+            <th>SOC</th>
+            <th>LIFE</th>
+            <th>FREE</th>
+            <th>GEN</th>
+            <th>CORR</th>
+            <th>DYST</th>
+            <th>Y</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" data-screen="coco">
+    <h2>COCO Payload Preview</h2>
+    <p>COCO Y0 needs three parts exactly: matrix (numbers only), object names, attribute names.</p>
+    <div class="row">
+      <div style="flex:1;min-width:280px;">
+        <h3>Matrix (numbers only)</h3>
+        <textarea id="matrixTextArea" rows="8" readonly></textarea>
+      </div>
+      <div style="flex:1;min-width:280px;">
+        <h3>Object Names</h3>
+        <textarea id="objectNamesTextArea" rows="8" readonly></textarea>
+      </div>
+      <div style="flex:1;min-width:280px;">
+        <h3>Attribute Names</h3>
+        <textarea id="attributeNamesTextArea" rows="8" readonly></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" data-screen="coco">
+    <h2>COCO Fallback</h2>
+    <p>If automatic COCO call fails, copy matrix text to COCO manually, then paste estimation values below (one per line).</p>
+    <textarea id="manualEstimationInput" rows="8" placeholder="Paste estimation values (same order as matrix rows)"></textarea>
+    <div class="row">
+      <button id="applyManualBtn">Apply Manual Estimations</button>
+    </div>
+  </section>
+
+  <section class="card" data-screen="results">
+    <h2>Results</h2>
+    <div id="correlations" class="corr-grid"></div>
+    <div class="row">
+      <input type="text" id="countrySearch" placeholder="Search country..." />
+      <button type="button" id="clearSearchBtn">Clear Search</button>
+    </div>
+    <div class="row">
+      <button id="exportCsvBtn">Export CSV</button>
+      <button id="exportXlsxBtn">Export XLSX</button>
+    </div>
+    <div class="table-wrap">
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>COCO:Y0</th>
+            <th>Ladder score</th>
+            <th>Explained by: Log GDP per capita</th>
+            <th>Explained by: Social support</th>
+            <th>Explained by: Healthy life expectancy</th>
+            <th>Explained by: Freedom to make life choices</th>
+            <th>Explained by: Generosity</th>
+            <th>Explained by: Perceptions of corruption</th>
+            <th>Dystopia + residual</th>
+            <th>naive2</th>
+            <th>naive2_rank</th>
+            <th>naive1</th>
+            <th>naive1_rank</th>
+            <th>objectiveRank</th>
+            <th>delta1</th>
+            <th>delta2</th>
+            <th>Becslés</th>
+            <th>Tény+0</th>
+            <th>COCO_Delta</th>
+            <th>COCO_Delta/Tény</th>
+            <th>Explain</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" data-screen="maps">
+    <h2>Color Maps (Green/Yellow/Red)</h2>
+    <p>Green = better, Yellow = middle, Red = weaker. For deltas, lower absolute deviation is better.</p>
+    <div class="row">
+      <button type="button" id="exportAllMapsBtn">Export All Maps (PNG)</button>
+    </div>
+    <div id="worldMaps" class="world-map-grid"></div>
+  </section>
+
+  <aside id="countryDrawer" class="country-drawer hidden-drawer" aria-hidden="true">
+    <div class="country-drawer-header">
+      <h3 id="drawerTitle">Country Detail</h3>
+      <button type="button" id="closeDrawerBtn" class="drawer-close-btn">Close</button>
+    </div>
+    <div id="drawerBody" class="country-drawer-body"></div>
+  </aside>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
